@@ -28,7 +28,7 @@ namespace SiteTree
             Regex regex = new Regex(@"<a.*?href=[""'](?<url>[^""^']+[.]*?)[""'].*?>(?<keywords>[^<]+[.]*?)</a>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
             //Regex siteregex = new Regex(@"/^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)/im");
             Regex siteregex = new Regex(@"/ (?: https ?:\/\/)?(?: www\.)?(.*?)\//");
-            TextReader reader = new StreamReader("1.html");
+            TextReader reader = new StreamReader(@"..\..\samples\1.html");
             string html = reader.ReadToEnd();
             MatchCollection matches = regex.Matches(html);
             Dictionary<string, string> links = new Dictionary<string, string>();
