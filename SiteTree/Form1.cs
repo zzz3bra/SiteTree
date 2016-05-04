@@ -21,6 +21,7 @@ namespace SiteTree
         {
             string baseURL = textBox1.Text;
             string[] userURL = new string[] { baseURL };
+            List<string> visitedURLs = new List<string>();
             Dictionary<string, string> links = new Dictionary<string, string>();
             GViewer viewer = new GViewer();
             Graph graph = new Graph("graph");
@@ -28,11 +29,21 @@ namespace SiteTree
 
             for (int depth = 1; depth <= numericUpDown1.Value; depth++)
             {
+                List<string> newURLs = new List<string>();
                 for (int domainNumber = 0; domainNumber < userURL.Length; domainNumber++)
                 {
-                    string htmlCode = client.DownloadString(userURL[domainNumber]);
-                    AddMatches(htmlCode, baseURL, userURL[domainNumber], links, graph);
+                    try
+                    {
+                        string htmlCode = client.DownloadString(userURL[domainNumber]);
+                        AddMatches(htmlCode, baseURL, userURL[domainNumber], newURLs, visitedURLs, links, graph);
+                    }
+                    catch (Exception)
+                    {
+
+                    }
                 }
+                visitedURLs.AddRange(newURLs);
+                userURL = newURLs.ToArray();
             }
 
             //graph.AddEdge("A", "C").Attr.Color = Microsoft.c.Drawing.Color.Green;
@@ -64,7 +75,9 @@ namespace SiteTree
             using (TextReader reader = new StreamReader(fileDialog.FileName))
             {
                 string htmlCode = reader.ReadToEnd();
-                AddMatches(htmlCode, "", currentURL, links, graph);
+                List<string> newURLs = new List<string>();
+                List<string> visitedURLs = new List<string>();
+                AddMatches(htmlCode, "", currentURL, newURLs, visitedURLs, links, graph);
             }
 
             viewer.CurrentLayoutMethod = LayoutMethod.MDS;
@@ -75,7 +88,7 @@ namespace SiteTree
             graphForm.ShowDialog();
         }
 
-        private void AddMatches(string html, string baseURL, string currentURL, Dictionary<string, string> links, Graph graph)
+        private void AddMatches(string html, string baseURL, string currentURL, List<string> newURLs, List<string> visitedURLs, Dictionary<string, string> links, Graph graph)
         {
             MatchCollection matches = HTMLRegex.Matches(html);
             foreach (Match item in matches)
@@ -100,6 +113,10 @@ namespace SiteTree
                 if (index == -1)
                 {
                     index = url.IndexOf('#', 9);
+                }
+                if (!newURLs.Contains(url) && !url.EndsWith(".pdf") && !visitedURLs.Contains(url))
+                {
+                    newURLs.Add(url);
                 }
                 url = new String(url.ToCharArray(), 0, index == -1 ? url.Length : index);
                 if (!links.ContainsKey(url))
