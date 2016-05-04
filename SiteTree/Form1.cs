@@ -97,6 +97,10 @@ namespace SiteTree
                 {
                     index = url.IndexOf('?', 9);
                 }
+                if (index == -1)
+                {
+                    index = url.IndexOf('#', 9);
+                }
                 url = new String(url.ToCharArray(), 0, index == -1 ? url.Length : index);
                 if (!links.ContainsKey(url))
                 {
